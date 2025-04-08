@@ -65,8 +65,8 @@ const createTodo =async (req,res,next)=>{
 }
 
 const updateTodo =async (req,res,next)=>{
-    const {id,todoContent,isCompleted} = req.body;
-    if(!id || !todoContent || !isCompleted){
+    const {id,todoContent} = req.body;
+    if(!id || !todoContent){
         const error = new Error("All fields are required")
         error.status = 401    
         next(error)
@@ -75,7 +75,40 @@ const updateTodo =async (req,res,next)=>{
     try {
         const updateTodo = await Todo.findByIdAndUpdate(
             id,{
-                todo: todoContent,
+                todo: todoContent
+            },{
+                new: true
+            }
+        )
+
+        if(!updateTodo){
+            const error = new Error("Todo not found")
+            error.status = 404
+            next(error)
+        }
+        
+        console.log(updateTodo);
+        res.status(200).json({
+            success: true,
+            message: "Todo content updated successfully",
+            data: updateTodo
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const toggleTodo =async (req,res,next)=>{
+    const {id,isCompleted} = req.body;
+    if(!id){
+        const error = new Error("Id is required")
+        error.status = 401
+        next(error)
+    } 
+
+    try {
+        const updateTodo = await Todo.findByIdAndUpdate(
+            id,{
                 isCompleted: isCompleted
             },{
                 new: true
@@ -91,7 +124,7 @@ const updateTodo =async (req,res,next)=>{
         console.log(updateTodo);
         res.status(200).json({
             success: true,
-            message: "Todo updated successfully",
+            message: "Todo toggle updated successfully",
             data: updateTodo
         })
     } catch (error) {
@@ -137,5 +170,6 @@ export{
     getTodoById,
     createTodo,
     updateTodo,
+    toggleTodo,
     deleteTodo
 }
